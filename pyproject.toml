@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "puzzle-frontier"
+version = "0.1.0"
+description = "Certified-unique logic puzzles beyond the published frontier + contamination-free LLM eval"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "SZL Holdings" }]
+keywords = ["logic-puzzles", "llm", "evaluation", "benchmark", "sudoku", "zebra", "futoshiki", "killer-sudoku"]
+dependencies = ["huggingface_hub>=0.30"]
+
+[project.optional-dependencies]
+service = ["fastapi>=0.110", "uvicorn>=0.29"]
+dev = ["pytest>=8", "build", "twine"]
+
+[project.urls]
+Dataset = "https://huggingface.co/datasets/SZLHOLDINGS/certified-puzzles-frontier-bank-v1"
+Upstream = "https://github.com/sarabehnamian/Puzzle-generation-with-guaranteed-uniqueness"
+
+[tool.setuptools.packages.find]
+where = ["src"]

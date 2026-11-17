@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>puzzle-frontier</title>
+<style>
+:root { --bg:#0b0f14; --card:#121821; --ink:#e8eef4; --dim:#8fa3b5; --acc:#31c48d; --line:#1e2833; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+header { padding:48px 24px 24px; max-width:880px; margin:0 auto; }
+h1 { font-size:32px; margin:0 0 8px; letter-spacing:-.5px; }
+.sub { color:var(--dim); margin:0 0 24px; font-size:16px; }
+.metrics { display:flex; gap:12px; flex-wrap:wrap; }
+.metric { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; }
+.metric b { display:block; font-size:22px; color:var(--acc); }
+.metric span { color:var(--dim); font-size:12px; }
+main { max-width:880px; margin:0 auto; padding:0 24px 64px; }
+.controls { display:flex; gap:10px; margin:16px 0; flex-wrap:wrap; }
+select, button, textarea { font:inherit; background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:10px 14px; }
+button { cursor:pointer; background:var(--acc); color:#06281a; font-weight:600; border:none; }
+button.ghost { background:var(--card); color:var(--ink); border:1px solid var(--line); }
+#puzzle { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-top:8px; }
+#prompt { white-space:pre-wrap; font-family:ui-monospace,Consolas,monospace; font-size:14px; line-height:1.6; }
+#clues li { margin:4px 0; }
+#verdict { margin-top:12px; font-weight:700; }
+.ok { color:var(--acc); } .no { color:#ff7a7a; }
+footer { color:var(--dim); font-size:13px; border-top:1px solid var(--line); padding:20px; text-align:center; }
+footer a { color:var(--dim); }
+</style>
+</head>
+<body>
+<header>
+  <h1>puzzle-frontier</h1>
+  <p class="sub">Certified-unique logic puzzles beyond the published frontier. Every item re-certified unique by MiniSat + OR-Tools CP-SAT. Zero LLM calls anywhere in generation, certification and grading.</p>
+  <div class="metrics" id="metrics"></div>
+</header>
+<main>
+  <div class="controls">
+    <select id="bank"></select>
+    <button onclick="loadRandom()">Draw puzzle</button>
+    <button class="ghost" onclick="window.open('https://huggingface.co/datasets/SZLHOLDINGS/certified-puzzles-frontier-bank-v1','_blank')">Dataset</button>
+  </div>
+  <div id="puzzle">
+    <div id="prompt">Press Draw puzzle to start.</div>
+    <ol id="clues"></ol>
+    <textarea id="answer" rows="4" style="width:100%;margin-top:12px" placeholder="Your answer (exact solution format)..."></textarea>
+    <button onclick="validate()">Validate</button>
+    <span id="verdict"></span>
+  </div>
+</main>
+<footer>
+  <a href="https://github.com/szl-holdings/puzzle-frontier">GitHub</a>
+  <span> | </span>
+  <a href="https://huggingface.co/datasets/SZLHOLDINGS/certified-puzzles-frontier-bank-v1">Hugging Face dataset</a>
+  <span> | </span>
+  <a href="https://github.com/sarabehnamian/Puzzle-generation-with-guaranteed-uniqueness/pull/8">Upstream PR 8</a>
+  <span> | </span>
+  MIT - pipeline (c) Sara Behnamian, product by SZL Holdings
+</footer>
+<script>
+var API = window.PUZZLE_API || "";
+var current = null;
+function el(id) { return document.getElementById(id); }
+function get(url) { return fetch(API + url).then(function (r) { return r.json(); }); }
+function post(url, body) {
+  return fetch(API + url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+    .then(function (r) { return r.json(); });
+}
+get("/banks").then(function (data) {
+  var m = el("metrics");
+  var html = "";
+  html += '<div class="metric"><b>' + data.total_items + '</b><span>certified items</span></div>';
+  html += '<div class="metric"><b>' + Object.keys(data.banks).length + '</b><span>banks incl. 4 new sizes</span></div>';
+  html += '<div class="metric"><b>L1-L5</b><span>difficulty ladder, MUS explanations</span></div>';
+  m.innerHTML = html;
+  var sel = el("bank");
+  var opt = document.createElement("option");
+  opt.value = ""; opt.textContent = "all banks";
+  sel.appendChild(opt);
+  Object.keys(data.banks).forEach(function (name) {
+    var o = document.createElement("option");
+    o.value = name;
+    o.textContent = name + " (" + data.banks[name].size + ", " + data.banks[name].n + ")";
+    sel.appendChild(o);
+  });
+}).catch(function () { el("prompt").textContent = "API not reachable. Run: uvicorn frontier_puzzles.service:app --port 8000"; });
+function loadRandom() {
+  var bank = el("bank").value;
+  get("/random" + (bank ? "?bank=" + encodeURIComponent(bank) : "")).then(function (it) {
+    current = it;
+    el("prompt").textContent = it.prompt;
+    el("clues").innerHTML = "";
+    (it.clues || []).forEach(function (c) {
+      var li = document.createElement("li");
+      li.textContent = c.text || c.dsl || JSON.stringify(c);
+      el("clues").appendChild(li);
+    });
+    el("answer").value = "";
+    el("verdict").textContent = "";
+  });
+}
+function validate() {
+  if (!current) return;
+  post("/validate", { id: current.id, answer: el("answer").value }).then(function (r) {
+    var v = el("verdict");
+    if (r.correct) { v.textContent = "CORRECT"; v.className = "ok"; }
+    else { v.textContent = "Not the certified solution - try again"; v.className = "no"; }
+  });
+}
+</script>
+</body>
+</html>
