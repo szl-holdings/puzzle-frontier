@@ -18,6 +18,9 @@ service = ["fastapi>=0.110", "uvicorn>=0.29"]
 dev = ["pytest>=8", "build", "twine"]
 
 [project.urls]
+Source = "https://github.com/szl-holdings/puzzle-frontier"
+Repository = "https://github.com/szl-holdings/puzzle-frontier"
+Homepage = "https://puzzle-frontier.stephenlutar2.workers.dev"
 Dataset = "https://huggingface.co/datasets/SZLHOLDINGS/certified-puzzles-frontier-bank-v1"
 Upstream = "https://github.com/sarabehnamian/Puzzle-generation-with-guaranteed-uniqueness"
 
