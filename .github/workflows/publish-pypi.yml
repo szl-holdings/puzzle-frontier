@@ -100,14 +100,14 @@ jobs:
           if-no-files-found: error
 
   publish:
-    name: Publish szl-kernels to PyPI (Trusted Publishing)
+    name: Publish puzzle-frontier to PyPI (Trusted Publishing)
     needs: build
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
       name: pypi
-      url: https://pypi.org/project/szl-kernels/${{ needs.build.outputs.version }}/
+      url: https://pypi.org/project/puzzle-frontier/${{ needs.build.outputs.version }}/
     permissions:
       id-token: write   # OIDC token for PyPI Trusted Publishing — the only credential
       contents: read
