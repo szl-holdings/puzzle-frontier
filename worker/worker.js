@@ -1,4 +1,4 @@
-// puzzle-frontier edge worker: serves the web app, proxies the API, gates premium routes with x402 v2.
+// puzzle-frontier edge worker: serves the web app, proxies the API (service binding to puzzle-frontier-api), gates premium routes with x402 v2.
 // Payment requirement mirrors the estate gateway (inference.a-11-oy.com): exact USDC on Base.
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -55,7 +55,12 @@ export default {
       const init = { method: request.method, headers: { "Content-Type": "application/json" } };
       if (request.method === "POST") init.body = await request.text();
       try {
-        const resp = await fetch(upstream, init);
+        let resp;
+        if (env.API_SERVICE) {
+          resp = await env.API_SERVICE.fetch(upstream, init);
+        } else {
+          resp = await fetch(upstream, init);
+        }
         const text = await resp.text();
         return new Response(text, { status: resp.status, headers: Object.assign({ "Content-Type": "application/json" }, CORS) });
       } catch (e) {
