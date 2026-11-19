@@ -24,7 +24,7 @@ solver metrics, and minimal-unsatisfiable-core explanations per fact.
 | Certified dataset (Hugging Face, MIT) | https://huggingface.co/datasets/SZLHOLDINGS/certified-puzzles-frontier-bank-v1 |
 | Upstream contribution PR | https://github.com/sarabehnamian/Puzzle-generation-with-guaranteed-uniqueness/pull/8 |
 | Upstream pipeline (MIT, Sara Behnamian) | https://github.com/sarabehnamian/Puzzle-generation-with-guaranteed-uniqueness |
-| PyPI package | https://pypi.org/project/puzzle-frontier/ |
+| PyPI package | **Not yet published** — checked 2026-11-19, the PyPI link returned 404; install from source below until the package lands |
 
 ## Quickstart (dev)
 
