@@ -7,6 +7,10 @@ directory = "./web"
 binding = "ASSETS"
 
 [vars]
-API_BASE = "http://127.0.0.1:8000"
+API_BASE = "https://puzzle-frontier-api.stephenlutar2.workers.dev"
 
-# Secrets (wrangler secret put ...): X402_PAY_TO - the on-chain payee address for premium routes
+[[services]]
+binding = "API_SERVICE"
+service = "puzzle-frontier-api"
+
+# Secrets (wrangler secret put ...): X402_PAY_TO - the on-chain payee address for premium routes (set: estate USDC/Base payee)

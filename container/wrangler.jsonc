@@ -1,0 +1,21 @@
+{
+  "name": "puzzle-frontier-api",
+  "main": "index.js",
+  "compatibility_date": "2026-11-01",
+  "containers": [
+    {
+      "name": "puzzle-frontier-api",
+      "image": "registry.cloudflare.com/d2d4084c615189c795286ea5eaec2229/puzzle-frontier-api:0.1.0",
+      "class_name": "PuzzleApiContainer",
+      "instance_type": "basic"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "PUZZLE_API", "class_name": "PuzzleApiContainer" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["PuzzleApiContainer"] }
+  ]
+}
