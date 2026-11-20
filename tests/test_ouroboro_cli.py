@@ -14,6 +14,7 @@ VALID_ZEBRA = {
 VALID_PLAN = {"cat": {"a": 1, "b": 2}}
 BAD_PLAN = {"cat": {"a": 2, "b": 1}}
 
+
 def env(action_id, item, plan):
     return {"action_id": action_id, "item": item, "plan": plan}
 
