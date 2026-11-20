@@ -8,6 +8,7 @@ never against model self-verification alone.
 
 Fail-closed contract (hardened after Kimi peer review round 2):
 - every public checker is total: malformed input returns False, never raises
+- public generic grid/zebra dimensions are capped at 64 to bound allocations
 - zebra clue DSL is closed: exactly keys {type, a, b}, type in {same, next,
   left, adjacent}; adjacent means spatial adjacency (|ha - hb| == 1)
 - killer cages are REQUIRED and must partition the whole grid
@@ -38,6 +39,11 @@ GRID_SHAPES: Dict[str, Tuple[int, int, int]] = {
     "futoshiki_6": (6, 0, 0),   # 0,0 = no boxes (latin only)
     "futoshiki_7": (7, 0, 0),
 }
+
+# Public verifier upper bounds: the defined puzzle families are at most 12x12.
+# Arbitrary attacker-declared dimensions must not drive large allocations.
+MAX_SUPPORTED_GRID_SIDE = 64
+MAX_ZEBRA_HOUSES = 64
 
 _SIZES = {
     ("sudoku", None): "sudoku_9",
@@ -75,6 +81,13 @@ def is_latin_square(grid: Any, side: int,
     """Total, fail-closed latin/box check. Returns False on any malformed
     grid, non-plain-int value, or (when boxes are declared and the side is
     not divisible into them) instead of silently skipping the box check."""
+    # Reject vacuous empty grids, bool/int confusion, partial box dimensions
+    # and oversized caller-declared shapes before constructing sets/ranges.
+    if (not _plain_int(side) or not 1 <= side <= MAX_SUPPORTED_GRID_SIDE
+            or not _plain_int(box_rows) or not _plain_int(box_cols)
+            or box_rows < 0 or box_cols < 0
+            or (box_rows == 0) != (box_cols == 0)):
+        return False
     try:
         if not isinstance(grid, (list, tuple)) or len(grid) != side:
             return False
@@ -118,7 +131,8 @@ def verify_zebra(solution: Any, n_houses: int = 5,
     permutation of houses 1..n_houses. Categories carry their own label
     sets (colors, pets, ...); cross-category label identity is not checked."""
     try:
-        if not _plain_int(n_houses) or n_houses < 1 or not isinstance(solution, dict):
+        if (not _plain_int(n_houses) or not 1 <= n_houses <= MAX_ZEBRA_HOUSES
+                or not isinstance(solution, dict)):
             return False
         cats = list(solution.keys())
         if not cats or not all(isinstance(c, str) for c in cats):
