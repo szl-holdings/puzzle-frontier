@@ -231,6 +231,29 @@ def test_zebra_unknown_reference_and_missing_fields_fail_closed():
     assert check_zebra_clues(ZEBRA, [malformed[3]]) is False
 
 
+
+def test_public_dimension_boundaries_fail_closed():
+    # Previously an empty grid with side zero silently returned True.
+    assert is_latin_square([], 0) is False
+    assert is_latin_square([[1]], False) is False
+    assert is_latin_square([[1]], True) is False
+    assert is_latin_square([[1]], 1) is True
+    # A supplied box constraint must not vanish when only one dimension is zero.
+    assert is_latin_square(SUDOKU_9, 9, 3, 0) is False
+    assert is_latin_square(SUDOKU_9, 9, 0, 3) is False
+    assert is_latin_square(SUDOKU_9, 9, True, 3) is False
+    assert is_latin_square(SUDOKU_9, 9, -3, 3) is False
+    assert is_latin_square(SUDOKU_9, 9, 3, 3) is True
+
+
+def test_public_zebra_dimension_is_bounded_before_allocation():
+    # This pathological metadata must be rejected *before* any large range/list.
+    assert verify_zebra(ZEBRA, 10**9) is False
+    assert verify_item({"family": "zebra", "n_houses": 10**9}, ZEBRA) is False
+    assert verify_zebra(ZEBRA, 5) is True
+    assert verify_item({"family": "zebra", "n_houses": 5}, ZEBRA) is True
+
+
 if __name__ == "__main__":
     import sys
     failures = []
